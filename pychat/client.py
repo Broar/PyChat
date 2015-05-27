@@ -1,0 +1,58 @@
+"""
+
+A client that can connect to a PyChat server and send messages
+
+@author Steven Briggs
+@version 2015.05.26
+
+"""
+
+import sys
+import argparse
+import socket
+import utils
+from random import randint
+
+def get_args():
+    """
+
+    Parse and return the arguments given at the command line
+
+    @returns the command line arguments
+
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("host", type=str, help="server to connect to")
+    parser.add_argument("port", type=str, help="port to connect on")
+    parser.add_argument("-c", "--channel", default="main", type=str, help="channel to connect to")
+    parser.add_argument("-n", "--name", type=str, help="display name for chat")
+    return parser.parse_args()
+
+def main():
+    # Read any command line arguments
+    args = get_args()
+    address = (args.host, args.port)
+    channel = args.channel
+    name = "user{0}".format(randint(0, 4096))
+
+    # Set the display name if the user entered one
+    if args.name:
+        name = args.name
+
+    sock = None
+
+    # Connect to the chat server
+    try:
+        sock = socket.create_connection(address)
+    except socket.error as e:
+        exit("socket error({0}) : {1}".format(e.errno, e.strerror))
+
+    # Send a message
+    try:
+        msg = "{0}|{1}".format(channel, name)
+        sock.sendall("{0:04d}{1}".format(len(msg), msg))
+    finally:
+        sock.close()
+
+if __name__ == "__main__":
+    sys.exit(main())

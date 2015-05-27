@@ -1,6 +1,6 @@
 """
 
-A simple chat server using TCP/IP and the publisher-subscriber pattern.
+A simple chat server using TCP/IP
 
 @author Steven Briggs
 @version 2015.05.25
@@ -10,9 +10,17 @@ A simple chat server using TCP/IP and the publisher-subscriber pattern.
 import sys
 import argparse
 import socket
+import threading
+import utils
 
 DEFAULT_PORT = 8080
 DEFAULT_BACKLOG = 5
+
+# A dictonary mapping channel names to objects
+channels = {}
+
+def handle_client():
+    pass
 
 def get_args():
     """
@@ -30,19 +38,27 @@ def main():
     args = get_args()
     port = args.port
 
-    # Prepare the listening socket
+    server_socket = None
+
+    # Prepare a socket to listen for connections
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((socket.gethostname(), port))
+
+    try:
+        server_socket.bind(("", port)) 
+    except socket.error as e:
+        server_socket.close()
+        exit("socket error({0}) : {1}".format(e.errno, e.strerror))
+
     server_socket.listen(DEFAULT_BACKLOG)
 
     # Accept connections until the program is killed
-    running = True
-    while running:
-        (client_socket, address) = server_socket.accept()
-        client_socket.close()
-        print("Got a client @ address {0}".format(address))
-
-    server_socket.close()
+    try:
+        running = True
+        while running:
+            (client_socket, address) = server_socket.accept()
+            print(utils.recv(client_socket))
+    finally:
+        server_socket.close()
 
 if __name__ == "__main__":
     sys.exit(main())
