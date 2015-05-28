@@ -28,8 +28,10 @@ def recv_len(sock):
 
     while n < MSG_LEN_SIZE:
         chunk = sock.recv(min(MSG_LEN_SIZE - n, MSG_LEN_SIZE))
+
         if chunk == "":
             raise RuntimeError("socket connection broken")
+
         chunks.append(chunk)
         n += len(chunk)
 
@@ -50,11 +52,14 @@ def recv_msg(sock, size):
 
     while n < size:
         chunk = sock.recv(MSG_BUFFER_SIZE)
+
         if chunk == "":
             raise RuntimeError("socket connection broken")
+
+        chunks.append(chunk)
         n += len(chunk)
 
-    return "".join(chunk)
+    return "".join(chunks)
 
 def recv(sock):
     """
